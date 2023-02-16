@@ -1,31 +1,30 @@
 #include "file.h"
-#include "config.h"
 
-#include <iostream>
 
 // File info
 bool get_file_information(struct stat& data) {
 	return stat(PATH, &data) == 0;
 }
 
-bool get_last_modification_date(char* buffer)
+const string get_last_modification_date()
 {
 	// returns the folders last modification date
 	struct stat data;
 	tm time;
+	char* buffer;
 
-	if (!get_file_information(data))
-		return false;
+	if (get_file_information(data))
+		gmtime_s(&time, &(data.st_mtime));
+		strftime(
+			buffer,
+			FORMAT_SIZE,
+			TIME_FORMAT,
+			&time
+		);
 
-	gmtime_s(&time, &(data.st_mtime));
-	strftime(
-		buffer,
-		FORMAT_SIZE,
-		TIME_FORMAT,
-		&time
-	);
+		return string(buffer);
 
-	return true;
+	return string();
 }
 
 

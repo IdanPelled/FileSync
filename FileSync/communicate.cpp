@@ -1,4 +1,5 @@
 #include "communicate.h"
+#include "config.h"
 
 
 Socket::Socket(int port)

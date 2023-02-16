@@ -1,11 +1,9 @@
 #include <iostream>
 
-#include "sync.h"
-#include "file.h"
-#include "build\zip.h"
+//#include "sync.h"
 
 
 int main() {
-	Sync s;
-	s.update();
+	
+	//Sync s;
 }

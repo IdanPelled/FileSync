@@ -1,18 +1,15 @@
 #pragma once
-
-// Server info
-#define SYNC_PORT 23456
-#define LOGIN_PORT 23457
-#define IP "192.168.88.187"
-
-// Folder path
-#define PATH "C:\\Users\\pelle\\OneDrive\\Desktop\\test\\"
-
-// Time format
-#define FORMAT_SIZE 18
-#define TIME_FORMAT "%d-%m-%y %H:%M:%S"
+#include "mINI\ini.h"
+#include <string>
+#include <iostream>
 
 
-#define MAX_LENGTH_BUFFER 2
+using std::string;
+using std::cout;
+using std::endl;
 
-#define HANDSHAKE "HandshakeHello"
+#define CONFIG_PATH "config.ini"
+
+
+string get_config(string section, string name);
+int get_int_config(string section, string name);
