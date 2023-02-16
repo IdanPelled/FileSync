@@ -1,6 +1,12 @@
 #pragma once
 #pragma comment(lib,"Cabinet.lib")
 
+#include <Windows.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <compressapi.h>
+
+
 int get_file_size(const char* path);
 bool get_file_information(struct stat& data);
 bool get_last_modification_date(char* buffer);
@@ -10,3 +16,11 @@ bool zip_folder(
 	char* out_buffer,
 	size_t& out_data_length
 );
+
+//TODO:
+bool zip(
+	const char* in_buffer,
+	char* out_buffer,
+	size_t& out_data_length
+);
+bool save_folder(const char* folder);

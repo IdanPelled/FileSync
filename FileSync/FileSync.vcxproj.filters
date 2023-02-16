@@ -24,6 +24,12 @@
     <ClInclude Include="file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="auth.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sync.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="file.cpp">
@@ -33,6 +39,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="communicate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sync.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="auth.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

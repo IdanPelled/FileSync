@@ -1,11 +1,11 @@
-#include "communicate.h"
-#include "file.h"
-
 #include <iostream>
 
+#include "sync.h"
+#include "file.h"
+#include "build\zip.h"
 
 
 int main() {
-	Socket s;
+	Sync s;
 	s.update();
 }
