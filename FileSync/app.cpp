@@ -1,9 +1,7 @@
+#include "sync.h"
 #include <iostream>
-
-//#include "sync.h"
 
 
 int main() {
-	
-	//Sync s;
+	Sync s;
 }

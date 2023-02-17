@@ -3,7 +3,7 @@
 
 // File info
 bool get_file_information(struct stat& data) {
-	return stat(PATH, &data) == 0;
+	return stat(get_folder_path().c_str(), &data) == 0;
 }
 
 const string get_last_modification_date()
@@ -11,19 +11,24 @@ const string get_last_modification_date()
 	// returns the folders last modification date
 	struct stat data;
 	tm time;
-	char* buffer;
+	size_t length = get_int_config("general", "format_size");
+	string format = get_config("general", "time_format");
+	char* buffer = new char[length];
 
 	if (get_file_information(data))
 		gmtime_s(&time, &(data.st_mtime));
 		strftime(
 			buffer,
-			FORMAT_SIZE,
-			TIME_FORMAT,
+			length,
+			format.c_str(),
 			&time
 		);
 
-		return string(buffer);
+		string date = { buffer };
+		delete[] buffer;
+		return date;
 
+	delete[] buffer;
 	return string();
 }
 

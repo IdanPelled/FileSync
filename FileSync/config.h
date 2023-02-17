@@ -13,3 +13,4 @@ using std::endl;
 
 string get_config(string section, string name);
 int get_int_config(string section, string name);
+string get_folder_path();

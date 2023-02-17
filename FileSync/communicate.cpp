@@ -4,8 +4,9 @@
 
 Socket::Socket(int port)
 {
-	// creates a socket and authenticates the connection
+	// creates a socket
 	if (!create_socket(sock, port)) {
+		cout << "unable to create the socket" << endl;
 		close_socket();
 	}
 }
@@ -77,7 +78,9 @@ bool Socket::create_socket(SOCKET& sock, int port)
 	// fill connection info
 	server.sin_family = AF_INET;
 	server.sin_port = htons(port);
-	InetPton(AF_INET, _T(IP), &server.sin_addr.s_addr);
+	string ip = get_config("server", "ip");
+	std::wstring ip_w = { ip.begin(), ip.end() };
+	InetPton(AF_INET, ip_w.c_str(), &server.sin_addr.s_addr);
 
 	// create socket
 	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
