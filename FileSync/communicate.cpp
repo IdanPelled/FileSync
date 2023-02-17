@@ -1,6 +1,8 @@
 #include "communicate.h"
 #include "config.h"
 
+#define LENGTH_HEADER 4
+
 
 Socket::Socket(int port)
 {
@@ -29,7 +31,7 @@ Socket::~Socket()
 	WSACleanup();
 }
 
-bool Socket::read_data(char* buffer, const int length)
+bool Socket::read_data(char* buffer, int length)
 {
 	// Reads data and checks for errors
 	int status_code = recv(sock, buffer, length, 0);

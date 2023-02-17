@@ -29,7 +29,7 @@ public:
 
 	bool create_socket(SOCKET& sock, int port);
 	void close_socket();
-	bool read_data(char* buffer, const int length);
+	bool read_data(char* buffer, int length);
 	bool send_data(const char* data, const int length);
 	bool send_data(const string& data);
 

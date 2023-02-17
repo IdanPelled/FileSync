@@ -1,5 +1,8 @@
 #include "file.h"
 
+#define TIME_FORMAT "%d-%m-%y%H:%M:%S"
+#define FORMAT_LENGTH 18
+
 
 // File info
 bool get_file_information(struct stat& data) {
@@ -11,16 +14,14 @@ const string get_last_modification_date()
 	// returns the folders last modification date
 	struct stat data;
 	tm time;
-	size_t length = get_int_config("general", "format_size");
-	string format = get_config("general", "time_format");
-	char* buffer = new char[length];
+	char* buffer = new char[FORMAT_LENGTH];
 
 	if (get_file_information(data))
 		gmtime_s(&time, &(data.st_mtime));
 		strftime(
 			buffer,
-			length,
-			format.c_str(),
+			FORMAT_LENGTH,
+			TIME_FORMAT,
 			&time
 		);
 
