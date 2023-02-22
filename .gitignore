@@ -1,0 +1,53 @@
+# Byte-compiled / optimized / DLL files for Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions for Python
+*.so
+*.pyd
+*.dll
+
+# Distribution / packaging for Python
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Jupyter Notebook for Python
+.ipynb_checkpoints/
+*.ipynb
+
+# Visual Studio files for C++
+*.sdf
+*.suo
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# CMake files for C++
+CMakeFiles/
+CMakeCache.txt
+CMakeCache/
+cmake_install.cmake
+install_manifest.txt
+
+# Object files for C++
+*.o
+*.ko
+*.obj
+*.elf
+
+# Executables for C++
+*.exe
+*.out
+*.app
+
+# Other generated files for C++
+*.dSYM/
+*.d
+
+# Clang-Tidy for C++
+compile_commands.json
+
