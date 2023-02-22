@@ -1,6 +1,6 @@
 #include "file.h"
 
-#define TIME_FORMAT "%d-%m-%y%H:%M:%S"
+#define TIME_FORMAT "%d-%m-%y %H:%M:%S"
 #define FORMAT_LENGTH 18
 
 
@@ -15,8 +15,8 @@ const string get_last_modification_date()
 	struct stat data;
 	tm time;
 	char* buffer = new char[FORMAT_LENGTH];
-
-	if (get_file_information(data))
+	
+	if (get_file_information(data)) {
 		gmtime_s(&time, &(data.st_mtime));
 		strftime(
 			buffer,
@@ -28,7 +28,8 @@ const string get_last_modification_date()
 		string date = { buffer };
 		delete[] buffer;
 		return date;
-
+	}
+		
 	delete[] buffer;
 	return string();
 }

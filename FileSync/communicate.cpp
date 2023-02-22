@@ -46,13 +46,14 @@ bool Socket::read_data(char* buffer, int length)
 
 bool Socket::send_data(const string& data)
 {
-	return send_data(data.c_str(), data.size());
+	return send_data((void*) data.c_str(), data.size());
 }
 
-bool Socket::send_data(const char* data, const int length)
+
+bool Socket::send_data(void* data, const int length)
 {
-	// Sends data and checks for errors
-	int status_code = send(sock, data, length, 0);
+	// Sends data and checks for errors	
+	int status_code = send(sock, (const char*) data, length, 0);
 	
 	if (status_code == SOCKET_ERROR) {
 		cout << "Faild sending data with status code " << WSAGetLastError() << endl;
