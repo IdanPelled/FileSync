@@ -4,6 +4,9 @@
 #define FORMAT_LENGTH 18
 
 
+extern std::shared_ptr<spdlog::logger> logger;
+
+
 // File info
 bool get_file_information(struct stat& data) {
 	return stat(get_folder_path().c_str(), &data) == 0;
@@ -29,7 +32,8 @@ const string get_last_modification_date()
 		delete[] buffer;
 		return date;
 	}
-		
+	
+	logger->error("can not get file information");
 	delete[] buffer;
 	return string();
 }

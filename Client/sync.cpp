@@ -1,12 +1,15 @@
 #include "sync.h"
 
 
+extern std::shared_ptr<spdlog::logger> logger;
+
+
 Sync::Sync()
 {
 	if (!update())
-		cout << "did not sync" << endl;
+		logger->error("did not sync");
 	else
-		cout << "syncronized successfuly" << endl;
+		logger->info("syncronized successfuly");
 }
 
 bool Sync::update()
@@ -28,7 +31,7 @@ bool Sync::update()
 
 	case Action::None:
 	default:
-		cout << "no action" << endl;
+		logger->info("no action");
 		break;
 	}
 
@@ -50,34 +53,36 @@ bool Sync::authenticate()
 
 	const string token = read_token();
 	if (token == "")
-		if (Auth::renew_token()) {
-			cout << "renewed token" << endl;
-			return false;
-		}
+	{
+		if (Auth::renew_token())
+			logger->info("renewed token");
+		
+		return false;
+	}
 	
 	TokenStatus status = send_token(token);
 	switch (status)
 	{
 	case TokenStatus::Valid:
-		cout << "valid token" << endl;
+		logger->info("valid token");
 		break;
 	
 	case TokenStatus::Outdated:
 		if (Auth::renew_token()) {
-			cout << "renewed token" << endl;
+			logger->info("renewed token");
 			return false;
 		}
 
-		cout << "login error - invalid username or password" << endl;
+		logger->error("login error - invalid username or password");
 		return false;
 
 	case TokenStatus::Invalid:
 	default:
-		cout << "login error - invalid token" << endl;
+		logger->error("login error - invalid token");
 		return false;
 	}
 
-	cout << "logged in successfully" << endl;
+	logger->info("logged in successfully");
 	return true;
 
 }
@@ -85,14 +90,14 @@ bool Sync::authenticate()
 
 bool Sync::upload()
 {
-	cout << "Uploading...." << endl;
+	logger->info("Uploading....");
 	return true;
 }
 
 
 bool Sync::download()
 {
-	cout << "Downloading...." << endl;
+	logger->info("Downloading....");
 	return true;
 }
 
@@ -106,7 +111,7 @@ TokenStatus Sync::send_token(const string& token)
 		return TokenStatus(status - '0');
 	}
 
-	cout << "error reading response" << endl;
+	logger->error("error reading response");
 	return TokenStatus::Invalid;
 }
 

@@ -3,12 +3,14 @@
 
 #define LENGTH_HEADER 4
 
+extern std::shared_ptr<spdlog::logger> logger;
+
 
 Socket::Socket(int port)
 {
 	// creates a socket
 	if (!create_socket(sock, port)) {
-		cout << "unable to create the socket" << endl;
+		logger->error("unable to create the socket");
 		close_socket();
 	}
 }
@@ -26,7 +28,7 @@ Socket::~Socket()
 	if (sock)
 		closesocket(sock);
 	else
-		cout << "Can not close socket - alreay closed" << endl;
+		logger->error("Can not close socket - alreay closed");
 	
 	WSACleanup();
 }
@@ -37,7 +39,7 @@ bool Socket::read_data(char* buffer, int length)
 	int status_code = recv(sock, buffer, length, 0);
 
 	if (status_code < 0) {
-		cout << "Faild reading data with status code " << WSAGetLastError() << endl;
+		logger->error("Faild reading data with status code {}", WSAGetLastError());
 		close_socket();
 	}
 
@@ -56,7 +58,7 @@ bool Socket::send_data(void* data, const int length)
 	int status_code = send(sock, (const char*) data, length, 0);
 	
 	if (status_code == SOCKET_ERROR) {
-		cout << "Faild sending data with status code " << WSAGetLastError() << endl;
+		logger->error("Faild sending data with status code {}", WSAGetLastError());
 		close_socket();
 	}
 
@@ -74,7 +76,7 @@ bool Socket::create_socket(SOCKET& sock, int port)
 	// init winsock dll
 	status_code = WSAStartup(WS_VERSION, &WSAData);
 	if (status_code != NO_ERROR) {
-		cout << "WSAStartup faild" << endl;
+		logger->error("WSAStartup faild");
 		return false;
 	}
 
@@ -88,14 +90,14 @@ bool Socket::create_socket(SOCKET& sock, int port)
 	// create socket
 	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (sock == INVALID_SOCKET) {
-		cout << "Socket creation faild" << endl;
+		logger->error("Socket creation faild");
 		return false;
 	}
 
 	// connect to server
 	status_code = connect(sock, (SOCKADDR*) &server, sizeof(server));
 	if (status_code == SOCKET_ERROR) {
-		cout << "Socket connection faild" << endl;
+		logger->error("Socket connection faild");
 		return false;
 	}
 

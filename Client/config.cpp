@@ -1,5 +1,6 @@
 #include "config.h"
 
+extern std::shared_ptr<spdlog::logger> logger;
 
 const string get_config(string section, string name)
 {
@@ -30,7 +31,7 @@ const int get_int_config(string section, string name)
 	int i;
 
 	if (sscanf_s(s.c_str(), "%d", &i) == EOF) {
-		cout << "invalid config type (" << section << ", " << name << ")" << endl;
+		logger->info("invalid config type ({}, {})", section, name);
 		return int();
 	}
 	return i;
