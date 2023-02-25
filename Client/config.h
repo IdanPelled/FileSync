@@ -1,5 +1,7 @@
 #pragma once
-#include "mINI\ini.h"
+#include "logger.h"
+
+#include <mini\ini.h>
 #include <string>
 #include <iostream>
 

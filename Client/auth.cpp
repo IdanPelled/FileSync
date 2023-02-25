@@ -1,5 +1,7 @@
 #include "auth.h"
 
+extern std::shared_ptr<spdlog::logger> logger;
+
 
 bool Auth::renew_token() {
 	// asks and saves the new token
@@ -9,12 +11,12 @@ bool Auth::renew_token() {
 
 	if (ask_for_token(token_buffer)) {
 		string str(token_buffer);
-		cout << str << " " << str.size() << endl;
 		save_token(str);
 		delete[] token_buffer;
 		return true;
 	}
 
+	logger->error("could not get token");
 	delete[] token_buffer;
 	return false;
 

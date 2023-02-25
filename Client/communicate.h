@@ -15,6 +15,7 @@
 
 #include "file.h"
 #include "config.h"
+#include "logger.h"
 
 
 using std::string;

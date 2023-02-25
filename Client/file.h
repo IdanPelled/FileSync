@@ -1,5 +1,6 @@
 #pragma once
 #include "config.h"
+#include "logger.h"
 
 
 #pragma comment(lib,"Cabinet.lib")
