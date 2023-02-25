@@ -90,3 +90,5 @@ bower-cache/
 Thumbs.db
 Desktop.ini
 
+# Database
+*.db

@@ -4,7 +4,7 @@ AUTH_PORT = 23457
 
 TIME_FORMAT = '%d-%m-%y %H:%M:%S'
 
-DB_PATH = 'sqlite:///database.db'
+DB_PATH = 'sqlite:///Server/database.db'
 DATA_PATH = '../'
 
 TOKEN_LENGTH = 127

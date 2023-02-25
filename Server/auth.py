@@ -10,6 +10,7 @@ from typing import Any, Tuple, Union
 from config import JWT_KEY, JWT_EXP, TOKEN_LENGTH
 from modles import session, Computer, User
 
+
 LENGTH_HEADER = 1
 
 
@@ -57,7 +58,7 @@ def send_success(sock: socket.socket) -> None:
 def authenticate(
     sock: socket.socket, token: str
 ) -> Tuple[TokenStatus, Union[Computer, None]]:
-    # To do: fix doc
+    # To do: fix documentation
     """Authenticate the client via token. Checks if
     the exp date is valid, and if the 'computer_id'
     is associated with the socket's ip. returns a
@@ -67,7 +68,10 @@ def authenticate(
     if status == TokenStatus.valid:
 
         comp_id = payload["computer_id"]
-        return TokenStatus.valid, get_computer_by_id(comp_id)
+        user = get_computer_by_id(comp_id)
+
+        
+        return TokenStatus.valid, user
 
     return status, None
     
