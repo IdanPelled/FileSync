@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)/Lib;$(ProjectDir)/Lib/spdlog/include/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)/Lib;$(ProjectDir)/Lib/spdlog/include/;$(ProjectDir)/Lib/tclap;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)/Lib;$(ProjectDir)/Lib/spdlog/include/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)/Lib;$(ProjectDir)/Lib/spdlog/include/;$(ProjectDir)/Lib/tclap;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -120,7 +120,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)/Lib;$(ProjectDir)/Lib/spdlog/include/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)/Lib;$(ProjectDir)/Lib/spdlog/include/;$(ProjectDir)/Lib/tclap;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -136,7 +136,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)/Lib;$(ProjectDir)/Lib/spdlog/include/;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)/Lib;$(ProjectDir)/Lib/spdlog/include/;$(ProjectDir)/Lib/tclap;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -149,18 +149,22 @@
   <ItemGroup>
     <ClCompile Include="app.cpp" />
     <ClCompile Include="auth.cpp" />
+    <ClCompile Include="cli.cpp" />
     <ClCompile Include="communicate.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="file.cpp" />
     <ClCompile Include="logger.cpp" />
+    <ClCompile Include="service.cpp" />
     <ClCompile Include="sync.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="auth.h" />
+    <ClInclude Include="cli.h" />
     <ClInclude Include="communicate.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="file.h" />
     <ClInclude Include="logger.h" />
+    <ClInclude Include="service.h" />
     <ClInclude Include="sync.h" />
   </ItemGroup>
   <ItemGroup>

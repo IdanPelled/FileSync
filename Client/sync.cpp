@@ -52,9 +52,12 @@ bool Sync::authenticate()
 	* Returns true if auth worked, false otherwise. */
 
 	const string token = read_token();
+	const string username = get_username();
+	const string password = get_password();
+
 	if (token == "")
 	{
-		if (Auth::renew_token())
+		if (Auth::renew_token(username, password))
 			logger->info("renewed token");
 		
 		return false;
@@ -68,7 +71,7 @@ bool Sync::authenticate()
 		break;
 	
 	case TokenStatus::Outdated:
-		if (Auth::renew_token()) {
+		if (Auth::renew_token(username, password)) {
 			logger->info("renewed token");
 			return false;
 		}

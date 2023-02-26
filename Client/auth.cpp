@@ -3,25 +3,49 @@
 extern std::shared_ptr<spdlog::logger> logger;
 
 
-bool Auth::renew_token() {
+bool Auth::renew_token(const string& username, const string& password) {
 	// asks and saves the new token
 
 	char* token_buffer = new char[TOKEN_LENGTH + 1];
 	token_buffer[TOKEN_LENGTH] = '\0';
 
-	if (ask_for_token(token_buffer)) {
+	if (ask_for_token(token_buffer, username, password)) {
 		string str(token_buffer);
 		save_token(str);
 		delete[] token_buffer;
 		return true;
 	}
 
-	logger->error("could not get token");
+	logger->error("wrong username or password");
 	delete[] token_buffer;
 	return false;
 
 	
 }
+
+bool Auth::login(const string& username, const string& password) {
+	if (renew_token(username, password)) {
+		set_config("app", "username", username);
+		set_config("app", "password", password);
+		return true;
+	}
+
+	return false;
+}
+
+
+bool Auth::signup(const string& username, const string& password) {
+	Socket sock{ get_int_config("server", "signup_port") };
+	char status_code;
+
+	return (
+		send_user_info(sock, username)
+		&& send_user_info(sock, password)
+		&& sock.read_data(&status_code, 1)
+		&& status_code == '0'
+	);
+}
+
 
 void Auth::save_token(string& token) {
 	// saves token to config file
@@ -29,7 +53,7 @@ void Auth::save_token(string& token) {
 	set_config("app", "token", token);
 }
 
-bool send_user_info(Socket& sock, string field) {
+bool Auth::send_user_info(Socket& sock, string field) {
 	
 	uint32_t length = field.length();
 	sock.send_data(reinterpret_cast<char*>(&length));
@@ -43,13 +67,15 @@ bool send_user_info(Socket& sock, string field) {
 }
 
 
-bool Auth::ask_for_token(char* token) {
+bool Auth::ask_for_token(
+	char* token,
+	const string& username,
+	const string& password
+) {
 	// sends the username and password and returns the token
 	Socket sock { get_int_config("server", "login_port") };
 	char status_code;
 
-	string username = get_username();
-	string password = get_password();
 	
 	return (
 		send_user_info(sock, username)
