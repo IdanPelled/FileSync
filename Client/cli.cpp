@@ -18,6 +18,7 @@ int cli_login(string username, string password) {
         return 0;
     }
 
+    logger->error("Failed");
     return 1;
 }
 
@@ -38,6 +39,7 @@ int cli_signup(string username, string password) {
         return 0;
     }
 
+    logger->error("Failed");
     return 1;
 }
 
