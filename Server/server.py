@@ -2,20 +2,21 @@ from socket import socket
 from typing import Any, Optional
 
 
-from config import AUTH_PORT, SYNC_PORT
+from config import LOGIN_PORT, SYNC_PORT, SIGNUP_PORT
 from communicate import connect, create_cocket, get_action, take_action
 from auth import (
     TokenStatus,
     CredentialsStatus,
     authenticate,
     read_token,
-    get_computer,
     read_credentials,
     is_valid,
     generate_token,
     send_token,
     send_success,
     send_error,
+    username_exists,
+    create_user,
 )
 
 
@@ -35,7 +36,7 @@ def server(port):
                 
                 except Exception as e:
                     sock.close()
-                    raise e
+                    print(e)
 
         return wrapper
 
@@ -60,10 +61,10 @@ def sync_server(sock: Optional[socket] = None) -> None:
     
     else:
         print("auth error")
-        send_error(sock, status_code)
+        send_error(sock, status_code.value)
 
 
-@server(AUTH_PORT)
+@server(LOGIN_PORT)
 def authorization_server(sock: Optional[socket] = None) -> None:
     """authorize a computer by
     assigning it a new token."""
@@ -77,5 +78,18 @@ def authorization_server(sock: Optional[socket] = None) -> None:
     
     else:
         print("login error")
-        send_error(sock, status_code)
+        send_error(sock, status_code.value)
+
+
+@server(SIGNUP_PORT)
+def signup_server(sock: Optional[socket] = None) -> None:
+    """create a new user."""
+
+    username, password = read_credentials(sock)
+    if username_exists(username): 
+        if create_user(username, password):
+            send_success(sock)
         
+        send_error(sock, 2)
+    
+    send_error(sock, 1)

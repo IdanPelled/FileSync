@@ -46,9 +46,8 @@ def read_token_data(token: str) -> Tuple[TokenStatus, dict[str, Any]]:
         return TokenStatus.invalid, {}
 
 
-def send_error(sock: socket.socket, status_code: TokenStatus) -> None:
-    # make sure that the status code is one digit
-    sock.send(str(status_code.value % 10).encode())
+def send_error(sock: socket.socket, status_code: int) -> None:
+    sock.send(str(status_code).encode())
 
 
 def send_success(sock: socket.socket) -> None:
@@ -187,3 +186,15 @@ def send_token(sock: socket.socket, token: str) -> str:
 
     send_success(sock)
     sock.send(token.encode())
+
+
+def create_user(username: str, password: str) -> bool:
+    """Creates a new user in the db."""
+
+
+
+def username_exists(username):
+    """Checks if username exists."""
+
+    user = session.query(User).filter_by(username=username).first()
+    return user is not None

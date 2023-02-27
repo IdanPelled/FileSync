@@ -235,6 +235,9 @@ class FileSyncUI:
             self.error_label.config(text="Signup failed")
 
     def logout(self):
+        for s in (FOLDER_PATH, "token", "username", "password"):
+            self.config.set(SECTION, s, "")
+            
         self.navigate_to_page("login")
         print("Loggin out...")
 

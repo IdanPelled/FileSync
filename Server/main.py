@@ -3,12 +3,13 @@ from threading import Thread
 
 
 from modles import User, Computer, session
-from server import sync_server, authorization_server
+from server import sync_server, authorization_server, signup_server
 
 
 
 def main():
     Thread(target=authorization_server).start()
+    Thread(target=signup_server).start()
     
     sync_server()
 
