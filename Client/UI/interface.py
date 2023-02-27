@@ -1,4 +1,16 @@
-import ctypes
+import os
 
-# Load the shared library
-mycppfunction = ctypes.cdll.LoadLibrary('C:\\Users\\pelle\\OneDrive\\Desktop\\FileSync\\Client\\Release\\Client.exe')
+
+
+def _login(username, password):
+    exe = os.getenv("FileSyncPath")
+    cmd = f"{exe} -l -u {username} -p {password}"
+    return os.system(cmd) == 0
+
+
+def _signup(username, password):
+    exe = os.getenv("FileSyncPath")
+    cmd = f"{exe} -l -u {username} -p {password}"
+    return os.system(cmd) == 0
+
+print(_signup(1, 2))

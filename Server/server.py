@@ -1,7 +1,6 @@
 from socket import socket
 from typing import Any, Optional
 
-
 from config import LOGIN_PORT, SYNC_PORT, SIGNUP_PORT
 from communicate import connect, create_cocket, get_action, take_action
 from auth import (
@@ -20,13 +19,39 @@ from auth import (
 )
 
 
-def server(port):
-    """A decorator for accepting
-    requests on a given port."""
+def server(port: int):
+    """A decorator for accepting requests on a given port.
+
+    Args:
+        port: An integer representing the port number on which to listen for requests.
+
+    Returns:
+        A decorator function.
+    """
 
     def decorator(f):
+        """A decorator that wraps the input function and listens for incoming requests on the given port.
+
+        Args:
+            f: A function to be wrapped.
+
+        Returns:
+            A wrapper function.
+        """
 
         def wrapper(*args, **kwargs) -> Any:
+            """The wrapper function that listens for incoming requests on the given port.
+
+            Args:
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
+
+            Returns:
+                The result of calling the input function with the given arguments.
+
+            Raises:
+                Exception: If any exception is encountered while listening for incoming requests.
+            """
             s = create_cocket(port)
 
             while True:
@@ -45,7 +70,14 @@ def server(port):
 
 @server(SYNC_PORT)
 def sync_server(sock: Optional[socket] = None) -> None:
-    """Syncs the client's folder."""
+    """Syncs the client's folder.
+
+    Args:
+        sock: A socket representing the connection to the client. Defaults to None.
+
+    Returns:
+        None.
+    """
 
     token = read_token(sock)
     status_code, comp = authenticate(sock, token)
@@ -66,8 +98,14 @@ def sync_server(sock: Optional[socket] = None) -> None:
 
 @server(LOGIN_PORT)
 def authorization_server(sock: Optional[socket] = None) -> None:
-    """authorize a computer by
-    assigning it a new token."""
+    """Authorize a computer by assigning it a new token.
+
+    Args:
+        sock: A socket representing the connection to the client. Defaults to None.
+
+    Returns:
+        None.
+    """
 
     username, password = read_credentials(sock)
     status_code = is_valid(username, password)
@@ -83,13 +121,19 @@ def authorization_server(sock: Optional[socket] = None) -> None:
 
 @server(SIGNUP_PORT)
 def signup_server(sock: Optional[socket] = None) -> None:
-    """create a new user."""
+    """Create a new user.
+
+    Args:
+        sock: A socket representing the connection to the client. Defaults to None.
+
+    Returns:
+        None.
+    """
 
     username, password = read_credentials(sock)
     if username_exists(username): 
-        if create_user(username, password):
-            send_success(sock)
-        
-        send_error(sock, 2)
+        create_user(username, password)
+        send_success(sock)
     
-    send_error(sock, 1)
+    else:
+        send_error(sock, 1)
