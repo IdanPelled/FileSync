@@ -22,4 +22,4 @@ bool get_file_information(struct stat& data);
 const string get_last_modification_date();
 bool save_folder(const char* folder);
 void extract_zip(const char* zip_buffer, size_t zip_size, const char* directory);
-char* compress_folder(const char* folder_path, size_t * zip_size);
+char* compress_folder(const char* folder_path, size_t* zip_size);
