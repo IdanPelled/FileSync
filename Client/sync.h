@@ -1,6 +1,7 @@
 #pragma once
 #include "communicate.h"
 #include "auth.h"
+#include "config.h"
 
 
 enum class Action {

@@ -31,7 +31,7 @@ const int get_int_config(string section, string name)
 	int i;
 
 	if (sscanf_s(s.c_str(), "%d", &i) == EOF) {
-		logger->info("invalid config type ({}, {})", section, name);
+		logger->error("invalid config type ({}, {})", section, name);
 		return int();
 	}
 	return i;
