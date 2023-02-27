@@ -4,8 +4,6 @@ extern std::shared_ptr<spdlog::logger> logger;
 
 
 bool Auth::renew_token(const string& username, const string& password) {
-	// asks and saves the new token
-
 	char* token_buffer = new char[TOKEN_LENGTH + 1];
 	token_buffer[TOKEN_LENGTH] = '\0';
 
@@ -48,13 +46,10 @@ bool Auth::signup(const string& username, const string& password) {
 
 
 void Auth::save_token(string& token) {
-	// saves token to config file
-
 	set_config("app", "token", token);
 }
 
 bool Auth::send_user_info(Socket& sock, string field) {
-	
 	uint32_t length = field.length();
 	sock.send_data(reinterpret_cast<char*>(&length));
 	sock.send_data(field);
@@ -72,7 +67,6 @@ bool Auth::ask_for_token(
 	const string& username,
 	const string& password
 ) {
-	// sends the username and password and returns the token
 	Socket sock { get_int_config("server", "login_port") };
 	char status_code;
 

@@ -13,6 +13,7 @@ bool get_file_information(struct stat& data) {
 }
 
 
+
 const string get_last_modification_date()
 {
 	// returns the folders last modification date
@@ -37,11 +38,6 @@ const string get_last_modification_date()
 	logger->error("can not get file information");
 	delete[] buffer;
 	return string();
-}
-
-
-bool save_folder(const char* folder) {
-	return true;
 }
 
 

@@ -12,6 +12,7 @@ Sync::Sync()
 		logger->info("syncronized successfuly");
 }
 
+
 bool Sync::update()
 {
 	/* If the token is valid, executes an action. */
@@ -47,10 +48,6 @@ inline const string read_token()
 
 bool Sync::authenticate()
 {
-	/* Authenticates the user via token.
-	* If the token is invaid, tries to renew it.
-	* Returns true if auth worked, false otherwise. */
-
 	const string token = read_token();
 	const string username = get_username();
 	const string password = get_password();
@@ -121,14 +118,14 @@ TokenStatus Sync::send_token(const string& token)
 
 Action Sync::get_action()
 {
-	/* sends the last modification date and 
-	return the action to preform */
-
 	char response;
 	const string date = get_last_modification_date();
 
-	sock.send_data(date);
-	sock.read_data(&response, 1);
-
-	return Action(response - '0');
+	if (date != "") {
+		sock.send_data(date);
+		sock.read_data(&response, 1);
+		return Action(response - '0');
+	}
+	
+	return Action::None;
 }
