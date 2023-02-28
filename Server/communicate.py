@@ -1,13 +1,10 @@
-from curses.ascii import isdigit
-from typing import Union
 import socket
 import time
 import enum
-import struct
 
 
 import files
-from config import TIME_FORMAT, HOST
+from config import TIME_FORMAT, HOST, DATA_PATH
 
 
 class Action(enum.Enum):
@@ -85,32 +82,37 @@ def connect(sock: socket.socket) -> socket.socket:
     return conn
 
 
-def upload(sock: socket.socket) -> None:
+def upload(sock: socket.socket, username: str) -> None:
     """
     Upload the client's folder.
 
     Parameters:
         sock (socket.socket): The client's socket.
+        username (str): the client's username
 
     """
 
-    print("Upload")
-    sock.recv(1024)
+    length = sock.recv(10).decode()
+    data = sock.recv(length)
+    
+    with open(f'{DATA_PATH}/{username}.zip', 'wb') as f:
+        f.write(data)
 
 
-def download(sock: socket.socket) -> None:
+def download(sock: socket.socket, username: str) -> None:
     """
     Download the server's folder.
 
     Parameters:
         sock (socket.socket): The client's socket.
-
+        username (str): the client's username
     """
 
-    print("Download")
-    msg = b"Folder"
-    sock.send(b"6")
-    sock.send(msg)
+    with open(f'{DATA_PATH}/{username}.zip', 'rb') as f:
+        data = f.read()
+
+    sock.send(len(data))
+    sock.send(data)
 
 
 def take_action(sock: socket.socket, action: Action) -> None:

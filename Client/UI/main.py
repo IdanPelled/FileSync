@@ -2,6 +2,8 @@ import tkinter as tk
 import configparser
 from tkinter import filedialog
 
+from interface import _login, _signup
+
 
 CONFIG_PATH = "Client/config.ini"
 SECTION = "app"
@@ -195,10 +197,7 @@ class FileSyncUI:
             self.error_label.config(text="Username and password are required")
             return
 
-        # TODO: Implement backend API call
-        authenticated = True
-
-        if authenticated:
+        if _login(username, password):
             self.config.set(SECTION, "username", username)
             self.config.set(SECTION, "password", password)
 
@@ -222,10 +221,8 @@ class FileSyncUI:
             self.error_label.config(text="Passwords do not match")
             return
 
-        # TODO: Implement backend API call
-        authenticated = True
 
-        if authenticated:
+        if _signup(username, password):
             self.config.set(SECTION, "username", username)
             self.config.set(SECTION, "password", password)
 

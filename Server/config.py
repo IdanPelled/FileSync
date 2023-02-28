@@ -6,7 +6,7 @@ SIGNUP_PORT = 23458
 TIME_FORMAT = '%d-%m-%y %H:%M:%S'
 
 DB_PATH = 'sqlite:///Server/database.db'
-DATA_PATH = '../'
+DATA_PATH = '../data'
 
 TOKEN_LENGTH = 127
 
