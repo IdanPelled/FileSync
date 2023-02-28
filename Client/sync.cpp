@@ -93,12 +93,12 @@ bool Sync::authenticate()
 
 bool Sync::upload()
 {
-	char* length_buffer;
-	char* zip_buffer;
-	size_t length;
+	char* length_buffer = new char;
+	char* zip_buffer = new char;
+	size_t length = 1;
 
 	logger->info("Uploading....");
-	zip_buffer = compress_folder(get_config("app", "folder").c_str(), &length);
+	//zip_buffer = compress_folder(get_config("app", "folder").c_str(), &length);
 	sock.send_data(std::to_string(length));
 	sock.send_data(zip_buffer);
 	
@@ -109,15 +109,15 @@ bool Sync::upload()
 
 bool Sync::download()
 {
-	char* length_buffer;
-	char* zip_buffer;
+	char* length_buffer = new char;
+	char* zip_buffer = new char;
 	int length;
 
 	logger->info("Downloading....");
 	sock.read_data(length_buffer, 10);
-	int length = std::stoi(length_buffer);
+	length = std::stoi(length_buffer);
 	sock.read_data(zip_buffer, length);
-	extract_zip(zip_buffer, length, get_config("app", "folder").c_str());
+	//extract_zip(zip_buffer, length, get_config("app", "folder").c_str());
 	
 	logger->info("Done");
 	return true;

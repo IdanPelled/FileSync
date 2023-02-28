@@ -45,6 +45,7 @@ bool save_folder(const char* folder) {
 }
 
 
+/*
 void add_directory_to_zip(mz_zip_archive* zip_archive, const char* path) {
     mz_zip_writer_add_path(zip_archive, path, NULL, MZ_BEST_COMPRESSION);
     char search_path[BUF_SIZE];
@@ -115,3 +116,4 @@ void extract_zip(const char* zip_buffer, size_t zip_size, const char* directory)
     mz_zip_reader_end(&zip_archive);
 }
 
+*/
