@@ -40,16 +40,13 @@ const string get_last_modification_date()
 	return string();
 }
 
-
-<<<<<<< HEAD
 bool save_folder(const char* folder) {
+    // TODO
 	return true;
 }
 
 
 /*
-=======
->>>>>>> 8eb79deb7e4e4497cc89e942eeac64f2b56fa86c
 void add_directory_to_zip(mz_zip_archive* zip_archive, const char* path) {
     mz_zip_writer_add_path(zip_archive, path, NULL, MZ_BEST_COMPRESSION);
     char search_path[BUF_SIZE];
