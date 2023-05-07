@@ -168,7 +168,7 @@
     <ClInclude Include="sync.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="config.ini" />
+    <None Include="..\..\..\..\..\..\ProgramData\FileSync\Config\config.ini" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

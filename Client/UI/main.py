@@ -5,7 +5,7 @@ from tkinter import filedialog
 from interface import _login, _signup
 
 
-CONFIG_PATH = "Client/config.ini"
+CONFIG_PATH = "C:\ProgramData\FileSync\Config\config.ini"
 SECTION = "app"
 FOLDER_PATH = "folder"
 
@@ -69,7 +69,7 @@ class FileSyncUI:
         if is_auth:
 
             logout_label = tk.Label(header_frame, text="Logout", font=("Arial", 14), fg=WHITE, bg=BLACK)
-            logout_label.bind("<Button-1>", lambda _: self.logout)
+            logout_label.bind("<Button-1>", lambda _: self.logout())
             logout_label.pack(side="right", padx=2, pady=10)
 
             welcome_label = tk.Label(header_frame, text=f"Welcome {self.get_username()}   | ", font=("Arial", 14), fg=WHITE, bg=BLACK)
@@ -133,8 +133,8 @@ class FileSyncUI:
         self.login_form_password = tk.StringVar()
         self.password_entry = self.create_text_box(self.login_frame, self.login_form_password, show="*")
 
-        self.error_label = tk.Label(self.login_frame, text="", fg=RED, bg=WHITE)
-        self.error_label.pack(side="top", padx=10, pady=5, anchor="w")
+        self.login_error_label = tk.Label(self.login_frame, text="", fg=RED, bg=WHITE)
+        self.login_error_label.pack(side="top", padx=10, pady=5, anchor="w")
 
         self.login_button = self.create_button(self.login_frame, "Login", RED, BLACK, self.login)
 
@@ -157,6 +157,10 @@ class FileSyncUI:
         self.confirm_password_label = self.create_labe(self.signup_frame, "Confirm password:", BLACK)
         self.signup_form_confirm_password = tk.StringVar()
         self.confirm_password_entry = self.create_text_box(self.signup_frame, self.signup_form_confirm_password, show="*")
+
+        self.signup_error_label = tk.Label(self.signup_frame, text="", fg=RED, bg=WHITE)
+        self.signup_error_label.pack(side="top", padx=10, pady=5, anchor="w")
+
 
         self.signup_button = self.create_button(self.signup_frame, "Sign Up", RED, BLACK, self.signup)
 
@@ -194,17 +198,14 @@ class FileSyncUI:
         password = self.login_form_password.get()
 
         if not (username and password):
-            self.error_label.config(text="Username and password are required")
+            self.login_error_label.config(text="Username and password are required")
             return
 
         if _login(username, password):
-            self.config.set(SECTION, "username", username)
-            self.config.set(SECTION, "password", password)
-
             self.navigate_to_page("homepage")
 
         else:
-            self.error_label.config(text="Incorrect username or password")
+            self.login_error_label.config(text="Incorrect username or password")
 
 
     def signup(self):
@@ -214,26 +215,24 @@ class FileSyncUI:
         confirm_password = self.signup_form_confirm_password.get()
 
         if not (username and password and confirm_password):
-            self.error_label.config(text="All fields are required")
+            self.signup_error_label.config(text="All fields are required")
             return
 
         if password != confirm_password:
-            self.error_label.config(text="Passwords do not match")
+            self.signup_error_label.config(text="Passwords do not match")
             return
 
 
         if _signup(username, password):
-            self.config.set(SECTION, "username", username)
-            self.config.set(SECTION, "password", password)
-
-            self.navigate_to_page("homepage")
+            self.navigate_to_page("login")
 
         else:
-            self.error_label.config(text="Signup failed")
+            self.signup_error_label.config(text="Signup failed")
 
     def logout(self):
         for s in (FOLDER_PATH, "token", "username", "password"):
             self.config.set(SECTION, s, "")
+        self.save_configuration_file(CONFIG_PATH)
             
         self.navigate_to_page("login")
         print("Loggin out...")
@@ -248,18 +247,25 @@ class FileSyncUI:
         print("Saving folder...")
         self.save(self.folder_entry.cget('text'))
 
+    def save_configuration_file(self, path):
+        with open(path, "w") as fh:
+            self.config.write(fh)
+
     def read_configuration_file(self, path):
         config = configparser.ConfigParser()
         config.read(path)
         return config
 
     def get_folder_path(self):
+        self.config = self.read_configuration_file(CONFIG_PATH)
         return self.config.get(SECTION, FOLDER_PATH)
 
     def update_folder_path(self, val):
+        self.config = self.read_configuration_file(CONFIG_PATH)
         self.config.set(SECTION, FOLDER_PATH, val)
     
     def get_username(self):
+        self.config = self.read_configuration_file(CONFIG_PATH)
         return self.config.get(SECTION, "username")
 
     def save_config_file(self, path: str):

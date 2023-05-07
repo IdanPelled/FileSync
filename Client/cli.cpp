@@ -67,7 +67,6 @@ int cli_sync() {
  * Returns:
  *  int: 0 if the operation was successful, otherwise 1. */
 int cli(int argc, char** argv) {
-    logger->info("Running CLI");
     try {
         TCLAP::CmdLine cmd("FileSync", ' ', "0.1");
 

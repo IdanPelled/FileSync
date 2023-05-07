@@ -12,7 +12,6 @@ Sync::Sync()
 		logger->info("syncronized successfuly");
 }
 
-
 bool Sync::update()
 {
 	/* If the token is valid, executes an action. */
@@ -48,6 +47,10 @@ inline const string read_token()
 
 bool Sync::authenticate()
 {
+	/* Authenticates the user via token.
+	* If the token is invaid, tries to renew it.
+	* Returns true if auth worked, false otherwise. */
+
 	const string token = read_token();
 	const string username = get_username();
 	const string password = get_password();
@@ -92,7 +95,7 @@ bool Sync::upload()
 {
 	char* length_buffer = new char;
 	char* zip_buffer = new char;
-	size_t length = 1;
+	size_t length = 0;
 
 	logger->info("Uploading....");
 	//zip_buffer = compress_folder(get_config("app", "folder").c_str(), &length);
@@ -137,14 +140,14 @@ TokenStatus Sync::send_token(const string& token)
 
 Action Sync::get_action()
 {
+	/* sends the last modification date and 
+	return the action to preform */
+
 	char response;
 	const string date = get_last_modification_date();
 
-	if (date != "") {
-		sock.send_data(date);
-		sock.read_data(&response, 1);
-		return Action(response - '0');
-	}
-	
-	return Action::None;
+	sock.send_data(date);
+	sock.read_data(&response, 1);
+
+	return Action(response - '0');
 }
