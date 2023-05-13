@@ -1,9 +1,9 @@
 #pragma once
+#include "communicate.h"
 #include "config.h"
 #include "logger.h"
 
 
-#pragma comment(lib,"Cabinet.lib")
 
 #include <Windows.h>
 #include <time.h>
@@ -13,9 +13,87 @@
 #include <string>
 #include <cstdio>
 #include <cstring>
-//#include "miniz.h"
+
+#include <fstream>
+#include <iostream>
+#include <filesystem>
+#include <archive.h>
+#include <archive_entry.h>
+#include <snappy.h>
+
+#define TIME_FORMAT "%d-%m-%y %H:%M:%S"
+#define FORMAT_LENGTH 18
 
 using std::string;
+
+/**
+ * Creates a tar archive from a given folder.
+ * @param folder_path the path to the folder to be archived
+ * @param out_tar a pointer to a char array that will hold the tar archive data
+ * @param buffer_size the size of the buffer allocated for the tar archive data
+ * @return the size of the tar archive data
+ */
+size_t create_tar_from_folder(const string& folder_path, char*& out_tar, const size_t buffer_size);
+
+/**
+ * Extracts a tar archive to a given folder.
+ * @param output_folder the path to the output folder
+ * @param tar_data a pointer to the tar archive data
+ * @param tar_size the size of the tar archive data
+ * @return true if extraction succeeded, false otherwise
+ */
+bool extract_tar_to_folder(const string& output_folder, const char* tar_data, const size_t tar_size);
+
+/**
+ * Compresses a character array using Snappy.
+ *
+ * @param input A pointer to the character array to be compressed.
+ * @param input_len The length of the character array to be compressed.
+ * @param output A reference to a string that will store the compressed output.
+ * @return true if compression succeeded, false otherwise.
+ */
+bool compress(const char* input, size_t input_len, string& output);
+
+/**
+ * Decompresses a character array that was compressed using Snappy.
+ *
+ * @param input A pointer to the compressed character array.
+ * @param input_len The length of the compressed character array.
+ * @param output A reference to a string that will store the decompressed output.
+ * @return true if decompression succeeded, false otherwise.
+ */
+bool decompress(const char* input, size_t input_len, string& output);
+
+/**
+ * Performs XOR encryption on a given string using the given key.
+ *
+ * @param data The string to be encrypted.
+ * @param key The key to use for encryption.
+ * @return The encrypted string.
+ */
+string xor_crypt(const string& data, const string& key);
+
+/**
+ * Creates a tar archive from a given folder, compresses it using
+ * Snappy, and performs XOR encryption on the resulting data.
+ *
+ * @param path The path of the folder to be archived.
+ * @param key The key to use for encryption.
+ * @param encrypted_file A reference to a string that will store the encrypted archive data.
+ * @return true if the process succeeded, false otherwise.
+ */
+bool load_folder(const string path, const string key, string& encrypted_file);
+
+/**
+ * Decrypts the given string using XOR, decompresses it using Snappy,
+ * and extracts the contents to the given folder.
+ *
+ * @param path The path of the folder to extract to.
+ * @param key The key to use for decryption.
+ * @param encrypted_file The encrypted archive data.
+ * @return true if the process succeeded, false otherwise.
+ */
+bool save_folder(const string path, const string key, const string& encrypted_file);
 
 /**
 * Get the last modification date of a folder.
@@ -35,24 +113,3 @@ bool get_file_information(struct stat& data);
  * If the function fails to retrieve the file information, an empty string is returned.
  */
 const string get_last_modification_date();
-
-/**
- * Extracts the contents of a ZIP archive from memory to a directory.
- *
- * This function uses the miniz library to read the zip archive from memory
- * and extract its contents to the specified directory.
- *
- * @param zip_buffer A pointer to the buffer containing the zip archive.
- * @param zip_size The size of the zip archive buffer in bytes.
- * @param directory The directory to which the zip archive contents should be extracted.
- */
-void extract_zip(const char* zip_buffer, size_t zip_size, const char* directory);
-
-/**
-* Compress a folder into a zip archive.
-* @param folder_path A pointer to a string containing the path of the folder to compress.
-* @param zip_size A pointer to a size_t variable that will store the size of the resulting zip archive.
-* @return A pointer to a char array containing the compressed zip archive.
-* If an error occurs while creating the zip archive, NULL is returned.
-*/
-char* compress_folder(const char* folder_path, size_t * zip_size);

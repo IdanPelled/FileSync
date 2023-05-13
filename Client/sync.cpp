@@ -1,9 +1,6 @@
 #include "sync.h"
 
 
-extern std::shared_ptr<spdlog::logger> logger;
-
-
 Sync::Sync()
 {
 	if (!update())
@@ -93,32 +90,62 @@ bool Sync::authenticate()
 
 bool Sync::upload()
 {
-	char* length_buffer = new char;
-	char* zip_buffer = new char;
-	size_t length = 0;
-
 	logger->info("Uploading....");
-	//zip_buffer = compress_folder(get_config("app", "folder").c_str(), &length);
-	sock.send_data(std::to_string(length));
-	sock.send_data(zip_buffer);
+	
+	string path, key, encrypted_file;
+
+	if (!load_folder(path, key, encrypted_file)) {
+		logger->info("error loading folder");
+		return false;
+	}
+
+	sock.send_data(std::to_string(encrypted_file.length()));
+	sock.send_data(encrypted_file);
 	
 	logger->info("Done");
 	return true;
 }
 
+bool read_archive(Socket& sock, string& encrypted_file)
+{
+	char* length_buffer = new char[10];
+	char* file_buffer;
+	long length;
+
+	sock.read_data(length_buffer, 10);
+	length = std::stoi(length_buffer);
+	if (length == 0) {
+		delete[] length_buffer;
+		logger->error("error reading archive length form socket");
+	}
+
+	file_buffer = new char[length];
+	sock.read_data(file_buffer, length);
+
+	encrypted_file = string(file_buffer);
+	delete[] length_buffer;
+	delete[] file_buffer;
+
+	if (encrypted_file == "") {
+		logger->error("error reading archive form socket");
+		return false;
+	}
+
+	return true;
+}
 
 bool Sync::download()
 {
-	char* length_buffer = new char;
-	char* zip_buffer = new char;
-	int length;
-
+	string path, key, encrypted_file;
 	logger->info("Downloading....");
-	sock.read_data(length_buffer, 10);
-	length = std::stoi(length_buffer);
-	sock.read_data(zip_buffer, length);
-	//extract_zip(zip_buffer, length, get_config("app", "folder").c_str());
+
+	read_archive(sock, encrypted_file);
 	
+	if (!save_folder(path, key, encrypted_file)) {
+		logger->info("error extracting folder");
+		return false;
+	}
+
 	logger->info("Done");
 	return true;
 }

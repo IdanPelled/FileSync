@@ -7,8 +7,6 @@
 
 
 using std::string;
-using std::cout;
-using std::endl;
 
 #define CONFIG_PATH "C:\\ProgramData\\FileSync\\Config\\config.ini"
 

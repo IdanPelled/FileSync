@@ -1,7 +1,7 @@
 #pragma once
 #include "communicate.h"
 
-#define TOKEN_LENGTH 127
+#define TOKEN_LENGTH 143
 
 
 // Enumerates possible token statuses.

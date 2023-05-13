@@ -2,6 +2,7 @@
 #include "communicate.h"
 #include "auth.h"
 #include "config.h"
+#include "file.h"
 
 
 /**
@@ -70,3 +71,6 @@ private:
 
 	Socket sock { get_int_config("server", "sync_port") };
 };
+
+/* */
+bool read_archive(Socket& sock, string& encrypted_file);
