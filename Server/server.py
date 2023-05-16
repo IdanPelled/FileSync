@@ -1,8 +1,9 @@
+import traceback
 from socket import socket
 from typing import Any, Optional
 
 from config import LOGIN_PORT, SYNC_PORT, SIGNUP_PORT
-from communicate import connect, create_cocket, get_action, take_action
+from communicate import connect, create_cocket, get_action, take_action, get_client_mod_date
 from auth import (
     TokenStatus,
     CredentialsStatus,
@@ -48,9 +49,7 @@ def server(port: int):
 
             Returns:
                 The result of calling the input function with the given arguments.
-
-            Raises:
-                Exception: If any exception is encountered while listening for incoming requests.
+            
             """
             s = create_cocket(port)
 
@@ -59,9 +58,9 @@ def server(port: int):
                     sock = connect(s)
                     f(sock, *args, **kwargs)
                 
-                except Exception as e:
+                except Exception:
                     sock.close()
-                    print(e)
+                    traceback.print_exc()
 
         return wrapper
 
@@ -85,14 +84,17 @@ def sync_server(sock: Optional[socket] = None) -> None:
     if status_code == TokenStatus.valid:
         # authenticated success
         send_success(sock)
-
-        action = get_action(sock, comp.id)
+        
+        mod_date = get_client_mod_date(sock)
+        action = get_action(comp.id, mod_date)
+        print(action.name)
         sock.send(str(action.value).encode())
 
-        take_action(sock, action)
+        if not take_action(sock, action, comp.user.username, mod_date):
+            print(f"could not compleate action {action.name}")
     
     else:
-        print("auth error")
+        print("auth error - invalid token")
         send_error(sock, status_code.value)
 
 
@@ -131,7 +133,7 @@ def signup_server(sock: Optional[socket] = None) -> None:
     """
 
     username, password = read_credentials(sock)
-    if username_exists(username): 
+    if not username_exists(username):
         create_user(username, password)
         send_success(sock)
     

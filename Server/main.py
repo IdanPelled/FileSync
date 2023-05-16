@@ -1,7 +1,5 @@
-from datetime import datetime, timedelta
 from threading import Thread
 
-from modles import User, Computer, session
 from server import sync_server, authorization_server, signup_server
 
 

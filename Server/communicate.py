@@ -1,6 +1,11 @@
+import datetime
 import socket
 import time
 import enum
+import struct
+from typing import Union
+from modles import session
+from auth import get_user_by_username
 
 
 import files
@@ -13,7 +18,7 @@ class Action(enum.Enum):
     DOWNLOAD = 2
 
 
-def get_action(sock: socket.socket, comp_id: int) -> Action:
+def get_action(comp_id: int, client_mod_date: datetime.datetime) -> Action:
     """
     Reads the client's versions and returns the appropriate action.
 
@@ -25,15 +30,16 @@ def get_action(sock: socket.socket, comp_id: int) -> Action:
         Action: The appropriate action to perform.
 
     """
+    server_mod_date = files.get_folder_mod_date(comp_id)
+    print(type(server_mod_date), type(client_mod_date))
+    print(server_mod_date, client_mod_date)
 
-    try:
-        client_mod_date = time.strptime(bytes.decode(sock.recv(len(TIME_FORMAT))), TIME_FORMAT)
 
-    except ValueError:
-        print("Invalid date format.")
+    if client_mod_date is None:
         return Action.NONE
 
-    server_mod_date = files.get_folder_mod_date(comp_id)
+    if server_mod_date is None:
+        return Action.UPLOAD
     
     if client_mod_date > server_mod_date:
         return Action.UPLOAD
@@ -42,6 +48,20 @@ def get_action(sock: socket.socket, comp_id: int) -> Action:
         return Action.DOWNLOAD
     
     return Action.NONE
+
+
+def get_client_mod_date(sock: socket.socket) -> Union[datetime.datetime, None]:
+    try:
+        return datetime.datetime.fromtimestamp(
+            time.mktime(time.strptime(
+                bytes.decode(sock.recv(len(TIME_FORMAT))),
+                TIME_FORMAT
+            )
+        ))
+
+    except ValueError:
+        print("Invalid date format.")
+        return None
 
 
 def create_cocket(port: int) -> socket.socket:
@@ -78,11 +98,18 @@ def connect(sock: socket.socket) -> socket.socket:
 
     sock.listen()
     conn, _ = sock.accept()
-    print(_, "!!!")
     return conn
 
 
-def upload(sock: socket.socket, username: str) -> None:
+def read_length_header(sock: socket.socket) -> int:
+    return struct.unpack('>I', sock.recv(4))[0]
+
+
+def send_length_header(sock: socket.socket, length: int) -> None:
+    sock.send(struct.pack('>I', length))
+
+
+def upload(sock: socket.socket, username: str, mod_date: datetime.datetime) -> bool:
     """
     Upload the client's folder.
 
@@ -90,47 +117,71 @@ def upload(sock: socket.socket, username: str) -> None:
         sock (socket.socket): The client's socket.
         username (str): the client's username
 
-    """
-
-    length = sock.recv(10).decode()
-    data = sock.recv(length)
+    Returns:
+        bool: True if the upload finished sucessfully, False otherwise
     
-    with open(f'{DATA_PATH}/{username}.zip', 'wb') as f:
+    """
+    print(username)
+    length = read_length_header(sock)
+    if length <= 0:
+        return False
+    
+    data = sock.recv(length)
+    with open(f'{DATA_PATH}/{username}', 'wb') as f:
         f.write(data)
 
+    
+    user = get_user_by_username(username)
+    user.backup_date = mod_date
+    session.commit()
+    return True
 
-def download(sock: socket.socket, username: str) -> None:
+
+def download(sock: socket.socket, username: str) -> bool:
     """
     Download the server's folder.
 
     Parameters:
         sock (socket.socket): The client's socket.
         username (str): the client's username
+    
+    Returns:
+        bool: True if the download finished sucessfully, False otherwise
+    
     """
-
-    with open(f'{DATA_PATH}/{username}.zip', 'rb') as f:
+    print(username)
+    with open(f'{DATA_PATH}/{username}', 'rb') as f:
         data = f.read()
 
-    sock.send(len(data))
+    send_length_header(sock, len(data))
     sock.send(data)
+    return True
 
 
-def take_action(sock: socket.socket, action: Action) -> None:
+def take_action(
+    sock: socket.socket,
+    action: Action,
+    username: str,
+    mod_date: datetime.datetime
+) -> bool:
     """
     Perform the appropriate action based on the given action enum.
 
     Parameters:
         sock (socket.socket): The client's socket.
         action (Action): The appropriate action to perform.
+        username (str): username
 
+    Returns:
+        bool: True if the action finished sucessfully, False otherwise
     """
 
     match action:
         case Action.NONE:
-            return
+            return True
 
         case Action.UPLOAD:
-            upload(sock)
+            return upload(sock, username, mod_date)
 
         case Action.DOWNLOAD:
-            download(sock)
+            return download(sock, username)

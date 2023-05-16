@@ -1,4 +1,3 @@
-from ctypes import sizeof
 from enum import Enum
 import socket
 import jwt
@@ -123,15 +122,23 @@ def authenticate(
     """
 
     status, payload = read_token_data(token)
-    if status == TokenStatus.valid:
 
-        comp_id = payload["computer_id"]
-        comp = get_computer_by_id(comp_id)
-
-        if comp.ip == get_ip(sock):
-            return TokenStatus.valid, comp
+    match status:
+        case TokenStatus.valid:
+            user_id = payload["user_id"]
+            comp = get_computer_by_id(payload["computer_id"])
+            print(user_id, comp.id)
+            
+            if (comp.ip == get_ip(sock)) and (comp.user_id == user_id):
+                return TokenStatus.valid, comp
+            
+            return TokenStatus.invalid, None
         
-    return TokenStatus.invalid, None
+        case TokenStatus.expired:
+            return TokenStatus.expired, None
+        
+        case TokenStatus.invalid:
+            return TokenStatus.invalid, None
 
 
 def get_computer_by_id(comp_id: int) -> Computer:
@@ -278,13 +285,21 @@ def generate_token(sock: socket.socket, username: str) -> str:
     """
 
     comp = get_computer(sock)
+    user = get_user_by_username(username)
+
     if comp is None:
         # New computer
-        user = get_user_by_username(username)
         comp = create_new_computer(sock, user.id)
         print("created new comp")
     
+    elif comp.user.username != username:
+        print("edited comp to new user")
+        comp.user = user
+        session.commit()
+
+
     payload = {
+        "user_id": user.id,
         "computer_id": comp.id,
         "exp": datetime.utcnow() + timedelta(seconds=JWT_EXP)
     }

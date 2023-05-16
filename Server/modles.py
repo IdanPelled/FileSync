@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, create_engine
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, create_engine
 from sqlalchemy.orm import sessionmaker, relationship
 
 from config import DB_PATH
@@ -12,19 +12,19 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
-    username = Column(String, unique=True)
-    password = Column(String)
+    username = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
 
-    backup_date = Column(Date)
+    backup_date = Column(DateTime)
 
 
 class Computer(Base):
     __tablename__ = 'computers'
 
     id = Column(Integer, primary_key=True)
-    ip = Column(String, unique=True)
+    ip = Column(String, unique=True, nullable=False)
     
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     user = relationship("User", back_populates="computers")
 
 User.computers = relationship("Computer", order_by=Computer.id, back_populates="user")
