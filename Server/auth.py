@@ -5,7 +5,7 @@ import logging
 
 from enum import Enum
 from datetime import datetime, timedelta
-from typing import Any, Tuple, Union
+from typing import Any, Dict, Tuple, Union
 
 from config import JWT_KEY, JWT_EXP, TOKEN_LENGTH
 from modles import session, Computer, User
@@ -47,7 +47,7 @@ def get_ip(sock: socket.socket) -> str:
     return sock.getsockname()[0]
 
 
-def read_token_data(token: str) -> Tuple[TokenStatus, dict[str, Any]]:
+def read_token_data(token: str) -> Tuple[TokenStatus, Dict[str, Any]]:
     """Returns the computer ID from a JWT token.
 
     This function checks the expiration and signature of the token,
