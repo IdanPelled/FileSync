@@ -7,10 +7,8 @@
 
 
 using std::string;
-using std::cout;
-using std::endl;
 
-#define CONFIG_PATH "config.ini"
+#define CONFIG_PATH "C:\\ProgramData\\FileSync\\Config\\config.ini"
 
 /**
  * @brief Returns a configuration value as a string from a specified section and name.

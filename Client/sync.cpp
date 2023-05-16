@@ -1,9 +1,6 @@
 #include "sync.h"
 
 
-extern std::shared_ptr<spdlog::logger> logger;
-
-
 Sync::Sync()
 {
 	if (!update())
@@ -11,7 +8,6 @@ Sync::Sync()
 	else
 		logger->info("syncronized successfuly");
 }
-
 
 bool Sync::update()
 {
@@ -48,6 +44,10 @@ inline const string read_token()
 
 bool Sync::authenticate()
 {
+	/* Authenticates the user via token.
+	* If the token is invaid, tries to renew it.
+	* Returns true if auth worked, false otherwise. */
+
 	const string token = read_token();
 	const string username = get_username();
 	const string password = get_password();
@@ -90,32 +90,62 @@ bool Sync::authenticate()
 
 bool Sync::upload()
 {
-	char* length_buffer;
-	char* zip_buffer;
-	size_t length;
-
 	logger->info("Uploading....");
-	zip_buffer = compress_folder(get_config("app", "folder").c_str(), &length);
-	sock.send_data(std::to_string(length));
-	sock.send_data(zip_buffer);
+	
+	string path, key, encrypted_file;
+
+	if (!load_folder(path, key, encrypted_file)) {
+		logger->info("error loading folder");
+		return false;
+	}
+
+	sock.send_data(std::to_string(encrypted_file.length()));
+	sock.send_data(encrypted_file);
 	
 	logger->info("Done");
 	return true;
 }
 
+bool read_archive(Socket& sock, string& encrypted_file)
+{
+	char* length_buffer = new char[10];
+	char* file_buffer;
+	long length;
+
+	sock.read_data(length_buffer, 10);
+	length = std::stoi(length_buffer);
+	if (length == 0) {
+		delete[] length_buffer;
+		logger->error("error reading archive length form socket");
+	}
+
+	file_buffer = new char[length];
+	sock.read_data(file_buffer, length);
+
+	encrypted_file = string(file_buffer);
+	delete[] length_buffer;
+	delete[] file_buffer;
+
+	if (encrypted_file == "") {
+		logger->error("error reading archive form socket");
+		return false;
+	}
+
+	return true;
+}
 
 bool Sync::download()
 {
-	char* length_buffer;
-	char* zip_buffer;
-	int length;
-
+	string path, key, encrypted_file;
 	logger->info("Downloading....");
-	sock.read_data(length_buffer, 10);
-	int length = std::stoi(length_buffer);
-	sock.read_data(zip_buffer, length);
-	extract_zip(zip_buffer, length, get_config("app", "folder").c_str());
+
+	read_archive(sock, encrypted_file);
 	
+	if (!save_folder(path, key, encrypted_file)) {
+		logger->info("error extracting folder");
+		return false;
+	}
+
 	logger->info("Done");
 	return true;
 }
@@ -137,14 +167,14 @@ TokenStatus Sync::send_token(const string& token)
 
 Action Sync::get_action()
 {
+	/* sends the last modification date and 
+	return the action to preform */
+
 	char response;
 	const string date = get_last_modification_date();
 
-	if (date != "") {
-		sock.send_data(date);
-		sock.read_data(&response, 1);
-		return Action(response - '0');
-	}
-	
-	return Action::None;
+	sock.send_data(date);
+	sock.read_data(&response, 1);
+
+	return Action(response - '0');
 }

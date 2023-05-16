@@ -8,8 +8,9 @@ bool Auth::renew_token(const string& username, const string& password) {
 	token_buffer[TOKEN_LENGTH] = '\0';
 
 	if (ask_for_token(token_buffer, username, password)) {
-		string str(token_buffer);
-		save_token(str);
+		string token = string(token_buffer);
+		logger->info(token);
+		set_config("app", "token", token);
 		delete[] token_buffer;
 		return true;
 	}
@@ -44,10 +45,6 @@ bool Auth::signup(const string& username, const string& password) {
 	);
 }
 
-
-void Auth::save_token(string& token) {
-	set_config("app", "token", token);
-}
 
 bool Auth::send_user_info(Socket& sock, string field) {
 	uint32_t length = field.length();
