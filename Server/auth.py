@@ -1,4 +1,5 @@
 from enum import Enum
+import hashlib
 import socket
 import jwt
 from datetime import datetime, timedelta
@@ -127,7 +128,6 @@ def authenticate(
         case TokenStatus.valid:
             user_id = payload["user_id"]
             comp = get_computer_by_id(payload["computer_id"])
-            print(user_id, comp.id)
             
             if (comp.ip == get_ip(sock)) and (comp.user_id == user_id):
                 return TokenStatus.valid, comp
@@ -203,7 +203,7 @@ def is_valid(username: str, password: str) -> CredentialsStatus:
 
     user: User = session.query(User).filter_by(
         username=username,
-        password=password
+        password=get_hash(password)
     ).scalar()
 
     if user is None:
@@ -348,7 +348,7 @@ def create_user(username: str, password: str) -> None:
         password (str): The password of the user to be created.
     """
 
-    user = User(username=username, password=password)
+    user = User(username=username, password=get_hash(password))
     session.add(user)
     session.commit()
 
@@ -366,3 +366,9 @@ def username_exists(username: str) -> bool:
 
     user = session.query(User).filter_by(username=username).first()
     return user is not None
+
+
+def get_hash(password: str):
+    sha = hashlib.sha256()
+    sha.update(password.encode("utf-8"))
+    return sha.hexdigest()

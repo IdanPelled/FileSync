@@ -58,7 +58,6 @@ class FileSyncUI:
         self.create_signup_page()
         self.create_homepage()
 
-
     def create_header(self, frame, is_auth):
         header_frame = tk.Frame(frame, bg=BLACK)
         header_frame.pack(side="top", fill="x")
@@ -182,10 +181,11 @@ class FileSyncUI:
         self.homepage_frame.pack(side="top", fill="both", expand=True)
         self.pages.update({"homepage": self.homepage_frame})
 
-    def navigate_to_page(self, page):
+    def navigate_to_page(self, page_name):
         self.hide_all()
 
-        page = self.pages[page]
+        self.current_page = page_name
+        page = self.pages[page_name]
         page.update()
         page.pack(side="top", fill="both", expand=True)
 
@@ -206,7 +206,6 @@ class FileSyncUI:
 
         else:
             self.login_error_label.config(text="Incorrect username or password")
-
 
     def signup(self):
         print("Signing up...")
@@ -275,6 +274,15 @@ class FileSyncUI:
     def save(self, path):
         self.update_folder_path(path)
         self.save_config_file(CONFIG_PATH)
+    
+    def clear_form(self):
+        page = self.pages[self.current_page]
+        for widget in page.winfo_children():
+            if isinstance(widget, tk.Entry) and widget["textvariable"] is not None:
+                var = widget["textvariable"]
+                if isinstance(var, tk.StringVar):
+                    var.set("")
+
 
 if __name__ == "__main__":
     # Create and run the UI

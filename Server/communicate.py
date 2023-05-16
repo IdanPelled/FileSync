@@ -31,9 +31,6 @@ def get_action(comp_id: int, client_mod_date: datetime.datetime) -> Action:
 
     """
     server_mod_date = files.get_folder_mod_date(comp_id)
-    print(type(server_mod_date), type(client_mod_date))
-    print(server_mod_date, client_mod_date)
-
 
     if client_mod_date is None:
         return Action.NONE
@@ -121,7 +118,7 @@ def upload(sock: socket.socket, username: str, mod_date: datetime.datetime) -> b
         bool: True if the upload finished sucessfully, False otherwise
     
     """
-    print(username)
+
     length = read_length_header(sock)
     if length <= 0:
         return False
@@ -149,7 +146,7 @@ def download(sock: socket.socket, username: str) -> bool:
         bool: True if the download finished sucessfully, False otherwise
     
     """
-    print(username)
+
     with open(f'{DATA_PATH}/{username}', 'rb') as f:
         data = f.read()
 
