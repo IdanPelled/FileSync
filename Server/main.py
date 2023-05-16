@@ -1,6 +1,11 @@
+import logging
 from threading import Thread
 
 from server import sync_server, authorization_server, signup_server
+
+
+def configure_logger():
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def main() -> None:

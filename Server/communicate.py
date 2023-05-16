@@ -1,15 +1,18 @@
 import datetime
+import logging
 import socket
 import time
 import enum
 import struct
+import files
 from typing import Union
+
 from modles import session
 from auth import get_user_by_username
-
-
-import files
 from config import TIME_FORMAT, HOST, DATA_PATH
+
+
+logger = logging.getLogger(__name__)
 
 
 class Action(enum.Enum):
@@ -57,7 +60,7 @@ def get_client_mod_date(sock: socket.socket) -> Union[datetime.datetime, None]:
         ))
 
     except ValueError:
-        print("Invalid date format.")
+        logger.error("Invalid date format.")
         return None
 
 
@@ -173,12 +176,11 @@ def take_action(
         bool: True if the action finished sucessfully, False otherwise
     """
 
-    match action:
-        case Action.NONE:
-            return True
+    if action == Action.NONE:
+        return True
 
-        case Action.UPLOAD:
-            return upload(sock, username, mod_date)
+    elif action == Action.UPLOAD:
+        return upload(sock, username, mod_date)
 
-        case Action.DOWNLOAD:
-            return download(sock, username)
+    elif action == Action.DOWNLOAD:
+        return download(sock, username)
