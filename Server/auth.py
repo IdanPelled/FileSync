@@ -335,7 +335,7 @@ def send_token(sock: socket.socket, token: str) -> None:
     """
 
     send_success(sock)
-    sock.send(token.encode())
+    sock.send(token)
 
 
 def create_user(username: str, password: str) -> None:
