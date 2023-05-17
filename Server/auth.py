@@ -130,7 +130,7 @@ def authenticate(
         user_id = payload["user_id"]
         comp = get_computer_by_id(payload["computer_id"])
         
-        if (comp.ip == get_ip(sock)) and (comp.user_id == user_id):
+        if (comp and comp.ip == get_ip(sock)) and (comp.user_id == user_id):
             return TokenStatus.valid, comp
         
         return TokenStatus.invalid, None
