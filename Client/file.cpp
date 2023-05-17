@@ -1,36 +1,6 @@
 #include "file.h"
 
 
-bool get_file_information(struct stat& data) {
-	return stat(get_folder_path().c_str(), &data) == 0;
-}
-
-const string get_last_modification_date()
-{
-	// returns the folders last modification date
-	struct stat data;
-	tm time;
-	char* buffer = new char[FORMAT_LENGTH];
-	
-	if (get_file_information(data)) {
-		gmtime_s(&time, &(data.st_mtime));
-		strftime(
-			buffer,
-			FORMAT_LENGTH,
-			TIME_FORMAT,
-			&time
-		);
-
-		string date = { buffer };
-		delete[] buffer;
-		return date;
-	}
-	
-	logger->error("can not get file information");
-	delete[] buffer;
-	return string();
-}
-
 size_t create_tar_from_folder(const string& folder_path, char*& out_tar, const size_t buffer_size)
 {
     std::size_t tar_size = 0;
@@ -46,36 +16,42 @@ size_t create_tar_from_folder(const string& folder_path, char*& out_tar, const s
     archive_write_set_format_ustar(memory_writer);
     archive_write_open_memory(memory_writer, buffer, buffer_size, &tar_size);
 
-    // Recursively iterate through the folder and its subdirectories
-    std::filesystem::path root_path(folder_path);
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(folder_path)) {
-        struct archive_entry* file_entry = archive_entry_new();
+    try {
+        // Recursively iterate through the folder and its subdirectories
+        std::filesystem::path root_path(folder_path);
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(folder_path)) {
+            struct archive_entry* file_entry = archive_entry_new();
 
-        // Get the relative path of the file/directory
-        std::filesystem::path relative_path = std::filesystem::relative(entry.path(), root_path);
+            // Get the relative path of the file/directory
+            std::filesystem::path relative_path = std::filesystem::relative(entry.path(), root_path);
 
-        archive_entry_copy_pathname(file_entry, relative_path.string().c_str());
+            archive_entry_copy_pathname(file_entry, relative_path.string().c_str());
 
-        if (entry.is_regular_file()) {
-            archive_entry_set_filetype(file_entry, AE_IFREG);
-            archive_entry_set_size(file_entry, entry.file_size());
+            if (entry.is_regular_file()) {
+                archive_entry_set_filetype(file_entry, AE_IFREG);
+                archive_entry_set_size(file_entry, entry.file_size());
 
-            archive_write_header(memory_writer, file_entry);
+                archive_write_header(memory_writer, file_entry);
 
-            std::ifstream file_stream(entry.path().string(), std::ios::binary);
-            char* file_buffer = new char[entry.file_size()];
-            file_stream.read(file_buffer, entry.file_size());
-            archive_write_data(memory_writer, file_buffer, entry.file_size());
-            delete[] file_buffer;
+                std::ifstream file_stream(entry.path().string(), std::ios::binary);
+                char* file_buffer = new char[entry.file_size()];
+                file_stream.read(file_buffer, entry.file_size());
+                archive_write_data(memory_writer, file_buffer, entry.file_size());
+                delete[] file_buffer;
+            }
+            else if (entry.is_directory()) {
+                archive_entry_set_filetype(file_entry, AE_IFDIR);
+                archive_write_header(memory_writer, file_entry);
+            }
+
+            archive_entry_free(file_entry);
         }
-        else if (entry.is_directory()) {
-            archive_entry_set_filetype(file_entry, AE_IFDIR);
-            archive_write_header(memory_writer, file_entry);
-        }
 
-        archive_entry_free(file_entry);
     }
-
+    
+    catch (const std::filesystem::filesystem_error& ex) {
+        logger->error(ex.what());
+    }
     // Finalize the libarchive writer and extract the tar archive from the in-memory buffer
     archive_write_close(memory_writer);
     archive_write_free(memory_writer);
@@ -149,13 +125,16 @@ bool decompress(const char* input, size_t input_len, string& output) {
     // Allocate space for the decompressed output
     size_t uncompressed_len;
     if (!snappy::GetUncompressedLength(input, input_len, &uncompressed_len)) {
+        logger->error("error in GetUncompressedLength");
         return false;
     }
     output.resize(uncompressed_len);
 
     // Decompress the input
-    if (!snappy::Uncompress(input, input_len, &output))
+    if (!snappy::Uncompress(input, input_len, &output)) {
+        logger->error("error in Uncompress");
         return false;
+    }
 
     return true;
 }
@@ -215,3 +194,42 @@ bool save_folder(const string path, const string key, const string& encrypted_fi
     logger->info("sucessfully extracted tar archive");
     return true;
 }
+
+void refresh_file_system()
+{
+    string path = get_config("app", "app_path") + "UpdateModDate.ps1 ";
+    system(("powershell.exe " + path + get_config("app", "folder")).c_str());
+}
+
+bool get_file_information(struct stat& data) {
+    return stat(get_folder_path().c_str(), &data) == 0;
+}
+
+const string get_last_modification_date()
+{
+    // returns the folders last modification date
+    struct stat data;
+    tm time;
+    char* buffer = new char[FORMAT_LENGTH];
+
+    refresh_file_system();
+    if (get_file_information(data)) {
+        gmtime_s(&time, &(data.st_mtime));
+        strftime(
+            buffer,
+            FORMAT_LENGTH,
+            TIME_FORMAT,
+            &time
+        );
+
+        string date = { buffer };
+        delete[] buffer;
+        return date;
+    }
+
+    logger->error("can not get file information");
+    delete[] buffer;
+    return string();
+}
+
+

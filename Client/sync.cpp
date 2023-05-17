@@ -28,19 +28,17 @@ bool Sync::update()
 
 	case Action::None:
 	default:
-		logger->info("no action");
+		logger->info("No action");
 		break;
 	}
 
 	return true;
 }
 
-
 inline const string read_token()
 {
 	return get_config("app", "token");
 }
-
 
 bool Sync::authenticate()
 {
@@ -52,13 +50,11 @@ bool Sync::authenticate()
 	const string username = get_username();
 	const string password = get_password();
 
-	if (token == "")
-	{
-		if (Auth::renew_token(username, password))
-			logger->info("renewed token");
-		
+	if (username == "" || password == "" || token == "") {
+		logger->error("authentication errror: missing credentials");
 		return false;
 	}
+
 	
 	TokenStatus status = send_token(token);
 	switch (status)
@@ -73,7 +69,7 @@ bool Sync::authenticate()
 			return false;
 		}
 
-		logger->error("login error - invalid username or password");
+		logger->info("error renewing token");
 		return false;
 
 	case TokenStatus::Invalid:
@@ -87,19 +83,43 @@ bool Sync::authenticate()
 
 }
 
+uint32_t read_length_header(Socket& sock) {
+
+	char length_buffer[HEADER_LENGTH];
+	uint32_t length;
+
+	sock.read_data(length_buffer, HEADER_LENGTH);
+	memcpy(&length, length_buffer, HEADER_LENGTH);
+	length = ntohl(length);
+
+	if (length == 0) {
+		logger->error("error reading archive length form socket");
+		return 0;
+	}
+
+	return length;
+}
+
+void send_length_header(uint32_t length, Socket& sock) {
+	length = htonl(length);
+	sock.send_data(&length, HEADER_LENGTH);
+}
 
 bool Sync::upload()
 {
+	string encrypted_file;
+
 	logger->info("Uploading....");
+	string path = get_config("app", "folder");
+	string key = get_config("app", "password");
 	
-	string path, key, encrypted_file;
 
 	if (!load_folder(path, key, encrypted_file)) {
 		logger->info("error loading folder");
 		return false;
 	}
-
-	sock.send_data(std::to_string(encrypted_file.length()));
+	
+	send_length_header(encrypted_file.length(), sock);
 	sock.send_data(encrypted_file);
 	
 	logger->info("Done");
@@ -108,39 +128,32 @@ bool Sync::upload()
 
 bool read_archive(Socket& sock, string& encrypted_file)
 {
-	char* length_buffer = new char[10];
-	char* file_buffer;
-	long length;
-
-	sock.read_data(length_buffer, 10);
-	length = std::stoi(length_buffer);
-	if (length == 0) {
-		delete[] length_buffer;
-		logger->error("error reading archive length form socket");
-	}
-
-	file_buffer = new char[length];
+	size_t length = read_length_header(sock);
+	char* file_buffer = new char[length];
 	sock.read_data(file_buffer, length);
 
-	encrypted_file = string(file_buffer);
-	delete[] length_buffer;
+	encrypted_file = string(file_buffer, length);
 	delete[] file_buffer;
 
-	if (encrypted_file == "") {
-		logger->error("error reading archive form socket");
+	if (encrypted_file == "")
 		return false;
-	}
-
 	return true;
 }
 
 bool Sync::download()
 {
-	string path, key, encrypted_file;
-	logger->info("Downloading....");
+	string encrypted_file;
 
-	read_archive(sock, encrypted_file);
+	logger->info("Downloading....");
+	string path = get_config("app", "folder");
+	string key = get_config("app", "password");
 	
+
+	if (!read_archive(sock, encrypted_file)) {
+		logger->error("error reading archive form socket");
+		return false;
+	}
+
 	if (!save_folder(path, key, encrypted_file)) {
 		logger->info("error extracting folder");
 		return false;
@@ -163,7 +176,6 @@ TokenStatus Sync::send_token(const string& token)
 	logger->error("error reading response");
 	return TokenStatus::Invalid;
 }
-
 
 Action Sync::get_action()
 {

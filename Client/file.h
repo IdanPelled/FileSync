@@ -9,17 +9,16 @@
 #include <time.h>
 #include <sys/stat.h>
 #include <compressapi.h>
-#include <iostream>
 #include <string>
 #include <cstdio>
 #include <cstring>
-
 #include <fstream>
-#include <iostream>
 #include <filesystem>
 #include <archive.h>
 #include <archive_entry.h>
 #include <snappy.h>
+#include <cstdlib>
+
 
 #define TIME_FORMAT "%d-%m-%y %H:%M:%S"
 #define FORMAT_LENGTH 18

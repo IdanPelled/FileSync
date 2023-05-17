@@ -1,20 +1,16 @@
 import os
 
 
+FILESYNC_PATH = "C:\\Users\\pelle\\Desktop\\FileSync\\Client\\x64\\Release\\Client.exe"
+
+
 def _login(username, password):
-    exe = os.getenv("FileSyncPath")
-    if exe:
-        cmd = f"{exe} -l -u {username} -p {password}"
-        return os.system(cmd) == 0
-    
-    raise EnvironmentError("missing FileSyncPath env variable")
+    cmd = f"{FILESYNC_PATH} -l -u {username} -p {password}"
+    return os.system(cmd) == 0
 
 
 def _signup(username, password):
-    exe = os.getenv("FileSyncPath")
-    if exe:
-        cmd = f"{exe} -s -u {username} -p {password}"
-        return os.system(cmd) == 0
+    cmd = f"{FILESYNC_PATH} -s -u {username} -p {password}"
+    return os.system(cmd) == 0
 
-    raise EnvironmentError("missing FileSyncPath env variable")
 

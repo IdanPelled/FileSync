@@ -21,6 +21,7 @@ class FileSyncUI:
 
     def __init__(self):
         self.init_config()
+        self.current_page = "homepage"
         self.run()
 
     def run(self):
@@ -184,6 +185,7 @@ class FileSyncUI:
     def navigate_to_page(self, page_name):
         self.hide_all()
 
+        self.clear_form()
         self.current_page = page_name
         page = self.pages[page_name]
         page.update()

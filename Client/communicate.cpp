@@ -3,8 +3,6 @@
 
 #define LENGTH_HEADER 4
 
-extern std::shared_ptr<spdlog::logger> logger;
-
 
 Socket::Socket(int port)
 {

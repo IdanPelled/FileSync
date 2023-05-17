@@ -4,6 +4,7 @@
 #include "config.h"
 #include "file.h"
 
+#define HEADER_LENGTH sizeof(uint32_t)
 
 /**
  * @brief An enum class representing actions to be performed in synchronization.

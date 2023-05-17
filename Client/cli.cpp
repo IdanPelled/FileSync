@@ -52,7 +52,6 @@ int cli_signup(string username, string password) {
 int cli_sync() {
     logger->info("Action: sync");
     Sync();
-    logger->info("Success");
     return 0;
 }
 

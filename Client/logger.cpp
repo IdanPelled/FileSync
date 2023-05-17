@@ -17,5 +17,4 @@ std::shared_ptr<spdlog::logger> get_logger() {
 	return spdlog::basic_logger_mt("logger", get_config("logger", "path"));
 }
 
-
 std::shared_ptr<spdlog::logger> logger = get_logger();
