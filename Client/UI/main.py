@@ -185,8 +185,6 @@ class FileSyncUI:
     def navigate_to_page(self, page_name):
         self.hide_all()
 
-        self.clear_form()
-        self.current_page = page_name
         page = self.pages[page_name]
         page.update()
         page.pack(side="top", fill="both", expand=True)
@@ -276,14 +274,6 @@ class FileSyncUI:
     def save(self, path):
         self.update_folder_path(path)
         self.save_config_file(CONFIG_PATH)
-    
-    def clear_form(self):
-        page = self.pages[self.current_page]
-        for widget in page.winfo_children():
-            if isinstance(widget, tk.Entry) and widget["textvariable"] is not None:
-                var = widget["textvariable"]
-                if isinstance(var, tk.StringVar):
-                    var.set("")
 
 
 if __name__ == "__main__":

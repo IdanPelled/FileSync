@@ -1,9 +1,12 @@
-import traceback
+import logging
+from sys import exc_info
 from socket import socket
 from typing import Any, Optional
 
 from config import LOGIN_PORT, SYNC_PORT, SIGNUP_PORT
-from communicate import connect, create_cocket, get_action, take_action, get_client_mod_date
+from communicate import (
+    connect, create_cocket, get_action, take_action, get_client_mod_date
+)
 from auth import (
     TokenStatus,
     CredentialsStatus,
@@ -18,6 +21,8 @@ from auth import (
     username_exists,
     create_user,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def server(port: int):
@@ -58,9 +63,9 @@ def server(port: int):
                     sock = connect(s)
                     f(sock, *args, **kwargs)
                 
-                except Exception:
+                except Exception as e:
                     sock.close()
-                    traceback.print_exc()
+                    logger.error(e, exc_info=True)
 
         return wrapper
 
@@ -87,14 +92,15 @@ def sync_server(sock: Optional[socket] = None) -> None:
         
         mod_date = get_client_mod_date(sock)
         action = get_action(comp.id, mod_date)
-        print(action.name)
+        
+        logger.info(f"User {comp.user.username}: Action {action.name}")
         sock.send(str(action.value).encode())
 
         if not take_action(sock, action, comp.user.username, mod_date):
-            print(f"could not compleate action {action.name}")
+            logger.error(f"could not compleate action {action.name}")
     
     else:
-        print("auth error - invalid token")
+        logger.error("auth error - invalid token")
         send_error(sock, status_code.value)
 
 
@@ -114,10 +120,11 @@ def authorization_server(sock: Optional[socket] = None) -> None:
 
     if status_code == CredentialsStatus.valid:
         token = generate_token(sock, username)
+        logger.info(f"Generated a new token for {username}")
         send_token(sock, token)
     
     else:
-        print("login error")
+        logger.error("login error - invalid credentials")
         send_error(sock, status_code.value)
 
 
@@ -136,6 +143,8 @@ def signup_server(sock: Optional[socket] = None) -> None:
     if not username_exists(username):
         create_user(username, password)
         send_success(sock)
+        logger.error("Created new user ({username})")
     
     else:
         send_error(sock, 1)
+        logger.error("signup error - username exists")

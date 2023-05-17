@@ -1,17 +1,19 @@
-from enum import Enum
 import hashlib
 import socket
 import jwt
-from datetime import datetime, timedelta
-import time
+import logging
 
-from typing import Any, Tuple, Union
+from enum import Enum
+from datetime import datetime, timedelta
+from typing import Any, Dict, Tuple, Union
 
 from config import JWT_KEY, JWT_EXP, TOKEN_LENGTH
 from modles import session, Computer, User
 
-
 LENGTH_HEADER = 1
+
+
+logger = logging.getLogger(__name__)
 
 
 class TokenStatus(Enum):
@@ -45,7 +47,7 @@ def get_ip(sock: socket.socket) -> str:
     return sock.getsockname()[0]
 
 
-def read_token_data(token: str) -> Tuple[TokenStatus, dict[str, Any]]:
+def read_token_data(token: str) -> Tuple[TokenStatus, Dict[str, Any]]:
     """Returns the computer ID from a JWT token.
 
     This function checks the expiration and signature of the token,
@@ -124,21 +126,20 @@ def authenticate(
 
     status, payload = read_token_data(token)
 
-    match status:
-        case TokenStatus.valid:
-            user_id = payload["user_id"]
-            comp = get_computer_by_id(payload["computer_id"])
-            
-            if (comp.ip == get_ip(sock)) and (comp.user_id == user_id):
-                return TokenStatus.valid, comp
-            
-            return TokenStatus.invalid, None
+    if status == TokenStatus.valid:
+        user_id = payload["user_id"]
+        comp = get_computer_by_id(payload["computer_id"])
         
-        case TokenStatus.expired:
-            return TokenStatus.expired, None
+        if (comp and comp.ip == get_ip(sock)) and (comp.user_id == user_id):
+            return TokenStatus.valid, comp
         
-        case TokenStatus.invalid:
-            return TokenStatus.invalid, None
+        return TokenStatus.invalid, None
+    
+    elif status == TokenStatus.expired:
+        return TokenStatus.expired, None
+    
+    elif status == TokenStatus.invalid:
+        return TokenStatus.invalid, None
 
 
 def get_computer_by_id(comp_id: int) -> Computer:
@@ -290,10 +291,8 @@ def generate_token(sock: socket.socket, username: str) -> str:
     if comp is None:
         # New computer
         comp = create_new_computer(sock, user.id)
-        print("created new comp")
     
     elif comp.user.username != username:
-        print("edited comp to new user")
         comp.user = user
         session.commit()
 
@@ -304,7 +303,7 @@ def generate_token(sock: socket.socket, username: str) -> str:
         "exp": datetime.utcnow() + timedelta(seconds=JWT_EXP)
     }
     
-    print("created new token")
+    logger.info("created new token")
     return jwt.encode(
         payload,
         JWT_KEY,
@@ -336,7 +335,7 @@ def send_token(sock: socket.socket, token: str) -> None:
     """
 
     send_success(sock)
-    sock.send(token.encode())
+    sock.send(token)
 
 
 def create_user(username: str, password: str) -> None:

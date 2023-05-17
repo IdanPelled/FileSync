@@ -1,3 +1,6 @@
+import os
+
+
 HOST = '0.0.0.0'
 SYNC_PORT = 23456
 LOGIN_PORT = 23457
@@ -11,5 +14,5 @@ DATA_PATH = './Server/data'
 
 TOKEN_LENGTH = 143
 
-JWT_KEY = "key"
+JWT_KEY = exe = os.getenv("FileSyncJWT")
 JWT_EXP = 60 * 60 * 24
